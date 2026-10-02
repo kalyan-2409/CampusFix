@@ -3,7 +3,7 @@
 
 # Old Java/Maven project files
 pom.xml
-src/
+/src/
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
