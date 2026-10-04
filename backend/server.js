@@ -30,9 +30,9 @@ mongoose.connect(process.env.MONGO_URI)
     .then(() => {
         console.log("MongoDB connected successfully");
 
-        app.listen(process.env.PORT, "127.0.0.1", () => {
+        app.listen(process.env.PORT || 5000, "0.0.0.0", () => {
             console.log(
-                `CampusFix server running on http://127.0.0.1:${process.env.PORT}`
+                `CampusFix server running on port ${process.env.PORT || 5000}`
             );
         });
     })
