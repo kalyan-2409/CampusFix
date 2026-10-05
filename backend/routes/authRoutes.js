@@ -2,27 +2,52 @@ const express = require("express");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
-const nodemailer = require("nodemailer");
-
 const db = require("../db");
 
 const router = express.Router();
 
 
 // ======================================================
-// EMAIL CONFIGURATION
+// BREVO EMAIL CONFIGURATION
 // ======================================================
+// Uses Brevo's HTTPS API instead of SMTP.
+// This avoids Render Free's outbound SMTP-port restriction.
 
-const transporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST,
-    port: Number(process.env.SMTP_PORT || 465),
-    secure: process.env.SMTP_SECURE !== "false",
-    auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS
+async function sendEmailWithBrevo({ to, subject, textContent, htmlContent }) {
+    if (!process.env.BREVO_API_KEY) {
+        throw new Error("BREVO_API_KEY is not configured.");
     }
-});
 
+    if (!process.env.SMTP_FROM) {
+        throw new Error("SMTP_FROM is not configured.");
+    }
+
+    const response = await fetch("https://api.brevo.com/v3/smtp/email", {
+        method: "POST",
+        headers: {
+            accept: "application/json",
+            "api-key": process.env.BREVO_API_KEY,
+            "content-type": "application/json"
+        },
+        body: JSON.stringify({
+            sender: {
+                name: "CampusFix",
+                email: process.env.SMTP_FROM
+            },
+            to: [{ email: to }],
+            subject,
+            textContent,
+            htmlContent
+        })
+    });
+
+    if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Brevo API error ${response.status}: ${errorText}`);
+    }
+
+    return response.json();
+}
 
 // ======================================================
 // REGISTER
@@ -55,9 +80,9 @@ router.post("/register", async (req, res) => {
             await db.execute(
 
                 `SELECT id
-                 FROM users
-                 WHERE email = ?
-                 OR rollNo = ?`,
+FROM users
+WHERE email = ?
+    OR rollNo = ?`,
 
                 [
                     email,
@@ -98,14 +123,14 @@ router.post("/register", async (req, res) => {
             await db.execute(
 
                 `INSERT INTO users
-                (
-                    name,
-                    rollNo,
-                    email,
-                    password,
-                    role
-                )
-                VALUES (?, ?, ?, ?, ?)`,
+(
+    name,
+    rollNo,
+    email,
+    password,
+    role
+)
+VALUES (?, ?, ?, ?, ?)`,
 
                 [
                     name,
@@ -192,8 +217,8 @@ router.post("/login", async (req, res) => {
             await db.execute(
 
                 `SELECT *
-                 FROM users
-                 WHERE email = ?`,
+FROM users
+WHERE email = ?`,
 
                 [
                     email
@@ -278,8 +303,8 @@ router.post("/login", async (req, res) => {
             await db.execute(
 
                 `DELETE FROM admin_otps
-                 WHERE user_id = ?
-                 AND used = FALSE`,
+WHERE user_id = ?
+    AND used = FALSE`,
 
                 [
                     user.id
@@ -293,14 +318,14 @@ router.post("/login", async (req, res) => {
             await db.execute(
 
                 `INSERT INTO admin_otps
-                (
-                    user_id,
-                    otp_hash,
-                    expires_at,
-                    attempts,
-                    used
-                )
-                VALUES (?, ?, ?, 0, FALSE)`,
+(
+    user_id,
+    otp_hash,
+    expires_at,
+    attempts,
+    used
+)
+VALUES (?, ?, ?, 0, FALSE)`,
 
                 [
                     user.id,
@@ -315,21 +340,22 @@ router.post("/login", async (req, res) => {
 
             try {
 
-                await transporter.sendMail({
-
-                    from:
-                        process.env.SMTP_FROM ||
-                        process.env.SMTP_USER,
-
-                    to:
-                    user.email,
-
-                    subject:
-                        "CampusFix Admin Login OTP",
-
-                    text:
-                        `Your CampusFix admin login OTP is ${otp}. It expires in 5 minutes. Do not share this OTP with anyone.`
-
+                await sendEmailWithBrevo({
+                    to: user.email,
+                    subject: "CampusFix Admin Login OTP",
+                    textContent:
+                        `Your CampusFix admin login OTP is ${otp}. It expires in 5 minutes. Do not share this OTP with anyone.`,
+                    htmlContent: `
+<div style="font-family:Arial,sans-serif;line-height:1.6">
+    <h2>CampusFix Admin Login</h2>
+<p>Your one-time password is:</p>
+<div style="font-size:32px;font-weight:bold;letter-spacing:8px">
+    ${otp}
+</div>
+<p>This OTP expires in <b>5 minutes</b>.</p>
+<p>Do not share this OTP with anyone.</p>
+</div>
+`
                 });
 
 
@@ -346,8 +372,8 @@ router.post("/login", async (req, res) => {
                 await db.execute(
 
                     `DELETE FROM admin_otps
-                     WHERE user_id = ?
-                     AND used = FALSE`,
+WHERE user_id = ?
+    AND used = FALSE`,
 
                     [
                         user.id
@@ -493,9 +519,9 @@ router.post(
                 await db.execute(
 
                     `SELECT *
-                     FROM users
-                     WHERE email = ?
-                     AND role = 'admin'`,
+FROM users
+WHERE email = ?
+    AND role = 'admin'`,
 
                     [
                         email
@@ -526,11 +552,11 @@ router.post(
                 await db.execute(
 
                     `SELECT *
-                     FROM admin_otps
-                     WHERE user_id = ?
-                     AND used = FALSE
-                     ORDER BY id DESC
-                     LIMIT 1`,
+FROM admin_otps
+WHERE user_id = ?
+    AND used = FALSE
+ORDER BY id DESC
+LIMIT 1`,
 
                     [
                         user.id
@@ -566,8 +592,8 @@ router.post(
                 await db.execute(
 
                     `UPDATE admin_otps
-                     SET used = TRUE
-                     WHERE id = ?`,
+SET used = TRUE
+WHERE id = ?`,
 
                     [
                         otpRecord.id
@@ -595,8 +621,8 @@ router.post(
                 await db.execute(
 
                     `UPDATE admin_otps
-                     SET used = TRUE
-                     WHERE id = ?`,
+SET used = TRUE
+WHERE id = ?`,
 
                     [
                         otpRecord.id
@@ -636,8 +662,8 @@ router.post(
                 await db.execute(
 
                     `UPDATE admin_otps
-                     SET attempts = attempts + 1
-                     WHERE id = ?`,
+SET attempts = attempts + 1
+WHERE id = ?`,
 
                     [
                         otpRecord.id
@@ -661,8 +687,8 @@ router.post(
             await db.execute(
 
                 `UPDATE admin_otps
-                 SET used = TRUE
-                 WHERE id = ?`,
+SET used = TRUE
+WHERE id = ?`,
 
                 [
                     otpRecord.id
@@ -780,8 +806,8 @@ router.post(
                 await db.execute(
 
                     `SELECT id, email
-                     FROM users
-                     WHERE email = ?`,
+FROM users
+WHERE email = ?`,
 
                     [
                         email
@@ -813,9 +839,9 @@ router.post(
             await db.execute(
 
                 `UPDATE password_resets
-                 SET used = TRUE
-                 WHERE user_id = ?
-                 AND used = FALSE`,
+SET used = TRUE
+WHERE user_id = ?
+    AND used = FALSE`,
 
                 [
                     user.id
@@ -847,20 +873,20 @@ router.post(
             await db.execute(
 
                 `INSERT INTO password_resets
-                (
-                    user_id,
-                    otp_hash,
-                    expires_at,
-                    attempts,
-                    used
-                )
-                VALUES (
-                    ?,
-                    ?,
-                    DATE_ADD(NOW(), INTERVAL 5 MINUTE),
-                    0,
-                    FALSE
-                )`,
+(
+    user_id,
+    otp_hash,
+    expires_at,
+    attempts,
+    used
+)
+VALUES (
+        ?,
+        ?,
+    DATE_ADD(NOW(), INTERVAL 5 MINUTE),
+0,
+    FALSE
+)`,
 
                 [
                     user.id,
@@ -874,56 +900,22 @@ router.post(
 
             try {
 
-                await transporter.sendMail({
-
-                    from:
-                        process.env.SMTP_FROM ||
-                        process.env.SMTP_USER,
-
-                    to:
-                    user.email,
-
-                    subject:
-                        "CampusFix Password Reset OTP",
-
-                    text:
+                await sendEmailWithBrevo({
+                    to: user.email,
+                    subject: "CampusFix Password Reset OTP",
+                    textContent:
                         `Your CampusFix password reset OTP is ${otp}. It expires in 5 minutes. If you did not request this, ignore this email.`,
-
-                    html: `
-                        <div style="
-                            font-family:Arial,sans-serif;
-                            line-height:1.6;
-                        ">
-
-                            <h2>
-                                CampusFix Password Reset
-                            </h2>
-
-                            <p>
-                                Your password reset OTP is:
-                            </p>
-
-                            <div style="
-                                font-size:32px;
-                                font-weight:bold;
-                                letter-spacing:8px;
-                            ">
-                                ${otp}
-                            </div>
-
-                            <p>
-                                This OTP expires in
-                                <b>5 minutes</b>.
-                            </p>
-
-                            <p>
-                                Do not share this OTP
-                                with anyone.
-                            </p>
-
-                        </div>
-                    `
-
+                    htmlContent: `
+<div style="font-family:Arial,sans-serif;line-height:1.6">
+    <h2>CampusFix Password Reset</h2>
+<p>Your password reset OTP is:</p>
+<div style="font-size:32px;font-weight:bold;letter-spacing:8px">
+    ${otp}
+</div>
+<p>This OTP expires in <b>5 minutes</b>.</p>
+<p>Do not share this OTP with anyone.</p>
+</div>
+`
                 });
 
 
@@ -940,9 +932,9 @@ router.post(
                 await db.execute(
 
                     `UPDATE password_resets
-                     SET used = TRUE
-                     WHERE user_id = ?
-                     AND used = FALSE`,
+SET used = TRUE
+WHERE user_id = ?
+    AND used = FALSE`,
 
                     [
                         user.id
@@ -1063,8 +1055,8 @@ router.post(
                 await db.execute(
 
                     `SELECT id, email
-                     FROM users
-                     WHERE email = ?`,
+FROM users
+WHERE email = ?`,
 
                     [
                         email
@@ -1095,11 +1087,11 @@ router.post(
                 await db.execute(
 
                     `SELECT *
-                     FROM password_resets
-                     WHERE user_id = ?
-                     AND used = FALSE
-                     ORDER BY id DESC
-                     LIMIT 1`,
+    FROM password_resets
+WHERE user_id = ?
+    AND used = FALSE
+ORDER BY id DESC
+LIMIT 1`,
 
                     [
                         user.id
@@ -1135,8 +1127,8 @@ router.post(
                 await db.execute(
 
                     `UPDATE password_resets
-                     SET used = TRUE
-                     WHERE id = ?`,
+SET used = TRUE
+WHERE id = ?`,
 
                     [
                         otpRecord.id
@@ -1164,8 +1156,8 @@ router.post(
                 await db.execute(
 
                     `UPDATE password_resets
-                     SET used = TRUE
-                     WHERE id = ?`,
+SET used = TRUE
+WHERE id = ?`,
 
                     [
                         otpRecord.id
@@ -1205,8 +1197,8 @@ router.post(
                 await db.execute(
 
                     `UPDATE password_resets
-                     SET attempts = attempts + 1
-                     WHERE id = ?`,
+SET attempts = attempts + 1
+WHERE id = ?`,
 
                     [
                         otpRecord.id
@@ -1243,8 +1235,8 @@ router.post(
             await db.execute(
 
                 `UPDATE users
-                 SET password = ?
-                 WHERE id = ?`,
+SET password = ?
+    WHERE id = ?`,
 
                 [
                     hashedPassword,
@@ -1259,8 +1251,8 @@ router.post(
             await db.execute(
 
                 `UPDATE password_resets
-                 SET used = TRUE
-                 WHERE id = ?`,
+SET used = TRUE
+WHERE id = ?`,
 
                 [
                     otpRecord.id
