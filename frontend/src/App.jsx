@@ -17,8 +17,8 @@ import {
 
 function StudentRoute({ children }) {
 
-    const token = localStorage.getItem("token");
-    const user = JSON.parse(localStorage.getItem("user"));
+    const token = sessionStorage.getItem("token");
+    const user = JSON.parse(sessionStorage.getItem("user"));
 
     if (!token || !user) {
         return <Navigate to="/login" replace />;
@@ -42,8 +42,8 @@ function StudentRoute({ children }) {
 
 function AdminRoute({ children }) {
 
-    const token = localStorage.getItem("token");
-    const userData = localStorage.getItem("user");
+    const token = sessionStorage.getItem("token");
+    const userData = sessionStorage.getItem("user");
 
     // No login information
     if (!token || !userData) {
@@ -56,8 +56,8 @@ function AdminRoute({ children }) {
         user = JSON.parse(userData);
     } catch (error) {
 
-        localStorage.removeItem("token");
-        localStorage.removeItem("user");
+        sessionStorage.removeItem("token");
+        sessionStorage.removeItem("user");
 
         return <Navigate to="/login" replace />;
     }
@@ -412,12 +412,12 @@ function Login() {
 
     const saveLogin = (response) => {
 
-        localStorage.setItem(
+        sessionStorage.setItem(
             "token",
             response.data.token
         );
 
-        localStorage.setItem(
+        sessionStorage.setItem(
             "user",
             JSON.stringify(response.data.user)
         );
@@ -888,14 +888,14 @@ function Dashboard() {
     const navigate = useNavigate();
 
     const user = JSON.parse(
-        localStorage.getItem("user")
+        sessionStorage.getItem("user")
     );
 
 
     const logout = () => {
 
-        localStorage.removeItem("token");
-        localStorage.removeItem("user");
+        sessionStorage.removeItem("token");
+        sessionStorage.removeItem("user");
 
         navigate("/login");
 
@@ -1178,7 +1178,7 @@ function ReportIssue() {
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
 
-    const token = localStorage.getItem("token");
+    const token = sessionStorage.getItem("token");
 
 
     const handleSubmit = async (e) => {
@@ -1562,7 +1562,7 @@ function MyIssues() {
         useState("");
 
     const token =
-        localStorage.getItem("token");
+        sessionStorage.getItem("token");
 
 
     // ==================================================
@@ -2892,10 +2892,10 @@ function AdminDashboard() {
     // ==================================================
 
     const token =
-        localStorage.getItem("token");
+        sessionStorage.getItem("token");
 
     const userData =
-        localStorage.getItem("user");
+        sessionStorage.getItem("user");
 
     let user = null;
 
@@ -3360,9 +3360,9 @@ const clearFilters = () => {
 
 const logout = () => {
 
-    localStorage.removeItem("token");
+    sessionStorage.removeItem("token");
 
-    localStorage.removeItem("user");
+    sessionStorage.removeItem("user");
 
     navigate("/login");
 
