@@ -129,7 +129,7 @@ function Register() {
             setLoading(true);
 
             const response = await axios.post(
-                "http://127.0.0.1:5001/api/auth/register",
+                "https://campusfix-bqs3.onrender.com/api/auth/register",
                 {
                     name,
                     rollNo,
@@ -452,7 +452,7 @@ function Login() {
         try {
 
             const response = await axios.post(
-                "http://127.0.0.1:5001/api/auth/login",
+                "https://campusfix-bqs3.onrender.com/api/auth/login",
                 {
                     email,
                     password
@@ -528,7 +528,7 @@ function Login() {
         try {
 
             const response = await axios.post(
-                "http://127.0.0.1:5001/api/auth/verify-otp",
+                "https://campusfix-bqs3.onrender.com/api/auth/verify-otp",
                 {
                     email,
                     otp
@@ -1205,7 +1205,7 @@ function ReportIssue() {
 
 
             const response = await axios.post(
-                "http://127.0.0.1:5001/api/issues",
+                "https://campusfix-bqs3.onrender.com/api/issues",
                 {
                     title,
                     category,
@@ -1215,8 +1215,7 @@ function ReportIssue() {
                 },
                 {
                     headers: {
-                        Authorization:
-                            `Bearer ${token}`
+                        Authorization: "Bearer " + token
                     }
                 }
             );
@@ -1588,12 +1587,12 @@ function MyIssues() {
             const response =
                 await axios.get(
 
-                    "http://127.0.0.1:5001/api/issues/my",
+                    "https://campusfix-bqs3.onrender.com/api/issues/my",
 
                     {
                         headers: {
                             Authorization:
-                                `Bearer ${token}`
+                                "Bearer " + token
                         }
                     }
 
@@ -2017,8 +2016,8 @@ function MyIssues() {
 
                                             <span
                                                 className={`badge ${getPriorityClass(
-                                                    issue.priority
-                                                )}`}
+    issue.priority
+)}`}
                                             >
 
                                                 {
@@ -2039,8 +2038,8 @@ function MyIssues() {
 
                                             <span
                                                 className={`status-badge ${getStatusClass(
-                                                    issue.status
-                                                )}`}
+    issue.status
+)}`}
                                             >
 
                                                 {
@@ -2936,11 +2935,11 @@ function AdminDashboard() {
 
             const response =
                 await axios.get(
-                    "http://127.0.0.1:5001/api/issues",
+                    "https://campusfix-bqs3.onrender.com/api/issues",
                     {
                         headers: {
                             Authorization:
-                                `Bearer ${token}`
+                                "Bearer " + token
                         }
                     }
                 );
@@ -2983,7 +2982,7 @@ function AdminDashboard() {
 
             const response = Array.isArray(issueId)
                 ? await axios.put(
-                    "http://127.0.0.1:5001/api/issues/group/status",
+                    "https://campusfix-bqs3.onrender.com/api/issues/group/status",
                     {
                         issueIds: issueId,
                         status: newStatus,
@@ -2991,452 +2990,452 @@ function AdminDashboard() {
                     },
                     {
                         headers: {
-                            Authorization: `Bearer ${token}`
+                            Authorization: "Bearer " + token
                         }
                     }
                 )
                 : await axios.put(
-                    `http://127.0.0.1:5001/api/issues/${issueId}/status`,
-                    {
-                        status: newStatus,
-                        resolutionNote
-                    },
-                    {
-                        headers: {
-                            Authorization: `Bearer ${token}`
-                        }
-                    }
-                );
+                    `https://campusfix-bqs3.onrender.com/api/issues/${issueId}/status`,
+{
+    status: newStatus,
+        resolutionNote
+},
+{
+    headers: {
+        Authorization: "Bearer " + token
+    }
+}
+);
 
 
-            setMessage(
-                response.data.message ||
-                "Issue updated successfully."
-            );
+setMessage(
+    response.data.message ||
+    "Issue updated successfully."
+);
 
 
-            // Clear temporary status
-            setPendingStatus(
-                (previous) => {
+// Clear temporary status
+setPendingStatus(
+    (previous) => {
 
-                    const updated = {
-                        ...previous
-                    };
+        const updated = {
+            ...previous
+        };
 
-                    if (Array.isArray(issueId)) {
-                        // Group status state is keyed by the problem-group key,
-                        // so it is cleared by the refresh below.
-                    } else {
-                        delete updated[issueId];
-                    }
-
-                    return updated;
-
-                }
-            );
-
-
-            // Clear temporary resolution note
-            setResolutionNotes(
-                (previous) => {
-
-                    const updated = {
-                        ...previous
-                    };
-
-                    if (Array.isArray(issueId)) {
-                        // Group status state is keyed by the problem-group key,
-                        // so it is cleared by the refresh below.
-                    } else {
-                        delete updated[issueId];
-                    }
-
-                    return updated;
-
-                }
-            );
-
-
-            // Refresh issues and clear temporary group controls
-            setPendingStatus({});
-            setResolutionNotes({});
-            await fetchIssues();
-
-
-        } catch (error) {
-
-            console.error(error);
-
-            setMessage(
-                error.response?.data?.message ||
-                "Failed to update issue status."
-            );
-
+        if (Array.isArray(issueId)) {
+            // Group status state is keyed by the problem-group key,
+            // so it is cleared by the refresh below.
+        } else {
+            delete updated[issueId];
         }
 
-    };
-
-
-    // ==================================================
-    // SEARCH + FILTER
-    // ==================================================
-
-    const filteredIssues =
-        issues.filter((issue) => {
-
-            const searchText =
-                search
-                    .toLowerCase()
-                    .trim();
-
-
-            const matchesSearch =
-
-                issue.title
-                    ?.toLowerCase()
-                    .includes(searchText)
-
-                ||
-
-                issue.location
-                    ?.toLowerCase()
-                    .includes(searchText)
-
-                ||
-
-                issue.description
-                    ?.toLowerCase()
-                    .includes(searchText)
-
-                ||
-
-                issue.category
-                    ?.toLowerCase()
-                    .includes(searchText)
-
-                ||
-
-                issue.reporterName
-                    ?.toLowerCase()
-                    .includes(searchText)
-
-                ||
-
-                issue.reporterRollNo
-                    ?.toLowerCase()
-                    .includes(searchText)
-
-                ||
-
-                issue.reporterEmail
-                    ?.toLowerCase()
-                    .includes(searchText);
-
-
-            const matchesCategory =
-                categoryFilter === "All" ||
-                issue.category ===
-                categoryFilter;
-
-
-            const matchesStatus =
-                statusFilter === "All" ||
-                issue.status ===
-                statusFilter;
-
-
-            const matchesPriority =
-                priorityFilter === "All" ||
-                issue.priority ===
-                priorityFilter;
-
-
-            return (
-                matchesSearch &&
-                matchesCategory &&
-                matchesStatus &&
-                matchesPriority
-            );
-
-        });
-
-
-    // Count unique students who reported the same problem.
-    // Reports are NOT deleted; they remain individual records.
-    const problemReportCounts = {};
-
-    issues.forEach((issue) => {
-        const key = getProblemKey(issue);
-
-        if (!problemReportCounts[key]) {
-            problemReportCounts[key] = new Set();
-        }
-
-        if (issue.reportedBy !== undefined && issue.reportedBy !== null) {
-            problemReportCounts[key].add(String(issue.reportedBy));
-        } else if (issue.reporterRollNo) {
-            problemReportCounts[key].add(String(issue.reporterRollNo));
-        } else if (issue.reporterEmail) {
-            problemReportCounts[key].add(String(issue.reporterEmail));
-        }
-    });
-
-
-    // Group filtered reports into one card per underlying problem.
-    // Individual reports remain stored in MySQL.
-    const groupedIssuesMap = {};
-
-    filteredIssues.forEach((issue) => {
-        const key = getProblemKey(issue);
-
-        if (!groupedIssuesMap[key]) {
-            groupedIssuesMap[key] = {
-                key,
-                representative: issue,
-                issues: []
-            };
-        }
-
-        groupedIssuesMap[key].issues.push(issue);
-    });
-
-    const groupedIssues = Object.values(groupedIssuesMap);
-
-
-    // A grouped problem is considered:
-    // Pending       -> if ANY student report is Pending
-    // In Progress   -> if there are no Pending reports but ANY is In Progress
-    // Resolved      -> only when ALL reports are Resolved
-    const getGroupStatus = (group) => {
-        const statuses = group.issues.map((item) => item.status);
-
-        if (statuses.includes("Pending")) {
-            return "Pending";
-        }
-
-        if (statuses.includes("In Progress")) {
-            return "In Progress";
-        }
-
-        return "Resolved";
-    };
-
-
-    // Build groups from ALL reports for dashboard statistics.
-    const allGroupsMap = {};
-
-    issues.forEach((issue) => {
-        const key = getProblemKey(issue);
-
-        if (!allGroupsMap[key]) {
-            allGroupsMap[key] = {
-                key,
-                representative: issue,
-                issues: []
-            };
-        }
-
-        allGroupsMap[key].issues.push(issue);
-    });
-
-    const allProblemGroups = Object.values(allGroupsMap);
-
-
-    // ==================================================
-    // STATISTICS — COUNT PROBLEMS, NOT INDIVIDUAL REPORTS
-    // ==================================================
-
-    const totalIssues =
-        allProblemGroups.length;
-
-
-    const pendingIssues =
-        allProblemGroups.filter(
-            (group) =>
-                getGroupStatus(group) === "Pending"
-        ).length;
-
-
-    const inProgressIssues =
-        allProblemGroups.filter(
-            (group) =>
-                getGroupStatus(group) === "In Progress"
-        ).length;
-
-
-    const resolvedIssues =
-        allProblemGroups.filter(
-            (group) =>
-                getGroupStatus(group) === "Resolved"
-        ).length;
-
-
-    const highPriorityIssues =
-        allProblemGroups.filter(
-            (group) =>
-                group.issues.some(
-                    (issue) => issue.priority === "High"
-                )
-        ).length;
-
-
-    // ==================================================
-    // CATEGORY ANALYTICS
-    // ==================================================
-
-    const categories = [
-
-        "Laboratory",
-
-        "Classroom",
-
-        "Wi-Fi",
-
-        "Water",
-
-        "Cleaning",
-
-        "Electrical",
-
-        "Furniture",
-
-        "Other"
-
-    ];
-
-
-    const categoryCounts =
-        categories.map(
-            (category) => {
-
-                return {
-
-                    category: category,
-
-                    count: issues.filter(
-                        (issue) =>
-                            issue.category ===
-                            category
-                    ).length
-
-                };
-
-            }
-        );
-
-
-    const maxCategoryCount =
-        Math.max(
-
-            ...categoryCounts.map(
-                (item) =>
-                    item.count
-            ),
-
-            1
-
-        );
-
-
-    // ==================================================
-    // CLEAR FILTERS
-    // ==================================================
-
-    const clearFilters = () => {
-
-        setSearch("");
-
-        setCategoryFilter("All");
-
-        setStatusFilter("All");
-
-        setPriorityFilter("All");
-
-    };
-
-
-    // ==================================================
-    // LOGOUT
-    // ==================================================
-
-    const logout = () => {
-
-        localStorage.removeItem("token");
-
-        localStorage.removeItem("user");
-
-        navigate("/login");
-
-    };
-
-
-    // ==================================================
-    // LOADING SCREEN
-    // ==================================================
-
-    if (loading) {
-
-        return (
-
-            <div className="app-container">
-
-
-                {/* NAVBAR */}
-
-                <nav className="navbar">
-
-                    <div className="logo">
-                        🛠 CampusFix
-                    </div>
-
-                </nav>
-
-
-                {/* LOADING */}
-
-                <main className="page-container">
-
-                    <div className="loading">
-
-                        Loading Admin Dashboard...
-
-                    </div>
-
-                </main>
-
-            </div>
-
-        );
+        return updated;
 
     }
+);
 
 
-    // ==================================================
-    // MAIN UI
-    // ==================================================
+// Clear temporary resolution note
+setResolutionNotes(
+    (previous) => {
+
+        const updated = {
+            ...previous
+        };
+
+        if (Array.isArray(issueId)) {
+            // Group status state is keyed by the problem-group key,
+            // so it is cleared by the refresh below.
+        } else {
+            delete updated[issueId];
+        }
+
+        return updated;
+
+    }
+);
+
+
+// Refresh issues and clear temporary group controls
+setPendingStatus({});
+setResolutionNotes({});
+await fetchIssues();
+
+
+} catch (error) {
+
+    console.error(error);
+
+    setMessage(
+        error.response?.data?.message ||
+        "Failed to update issue status."
+    );
+
+}
+
+};
+
+
+// ==================================================
+// SEARCH + FILTER
+// ==================================================
+
+const filteredIssues =
+    issues.filter((issue) => {
+
+        const searchText =
+            search
+                .toLowerCase()
+                .trim();
+
+
+        const matchesSearch =
+
+            issue.title
+                ?.toLowerCase()
+                .includes(searchText)
+
+            ||
+
+            issue.location
+                ?.toLowerCase()
+                .includes(searchText)
+
+            ||
+
+            issue.description
+                ?.toLowerCase()
+                .includes(searchText)
+
+            ||
+
+            issue.category
+                ?.toLowerCase()
+                .includes(searchText)
+
+            ||
+
+            issue.reporterName
+                ?.toLowerCase()
+                .includes(searchText)
+
+            ||
+
+            issue.reporterRollNo
+                ?.toLowerCase()
+                .includes(searchText)
+
+            ||
+
+            issue.reporterEmail
+                ?.toLowerCase()
+                .includes(searchText);
+
+
+        const matchesCategory =
+            categoryFilter === "All" ||
+            issue.category ===
+            categoryFilter;
+
+
+        const matchesStatus =
+            statusFilter === "All" ||
+            issue.status ===
+            statusFilter;
+
+
+        const matchesPriority =
+            priorityFilter === "All" ||
+            issue.priority ===
+            priorityFilter;
+
+
+        return (
+            matchesSearch &&
+            matchesCategory &&
+            matchesStatus &&
+            matchesPriority
+        );
+
+    });
+
+
+// Count unique students who reported the same problem.
+// Reports are NOT deleted; they remain individual records.
+const problemReportCounts = {};
+
+issues.forEach((issue) => {
+    const key = getProblemKey(issue);
+
+    if (!problemReportCounts[key]) {
+        problemReportCounts[key] = new Set();
+    }
+
+    if (issue.reportedBy !== undefined && issue.reportedBy !== null) {
+        problemReportCounts[key].add(String(issue.reportedBy));
+    } else if (issue.reporterRollNo) {
+        problemReportCounts[key].add(String(issue.reporterRollNo));
+    } else if (issue.reporterEmail) {
+        problemReportCounts[key].add(String(issue.reporterEmail));
+    }
+});
+
+
+// Group filtered reports into one card per underlying problem.
+// Individual reports remain stored in MySQL.
+const groupedIssuesMap = {};
+
+filteredIssues.forEach((issue) => {
+    const key = getProblemKey(issue);
+
+    if (!groupedIssuesMap[key]) {
+        groupedIssuesMap[key] = {
+            key,
+            representative: issue,
+            issues: []
+        };
+    }
+
+    groupedIssuesMap[key].issues.push(issue);
+});
+
+const groupedIssues = Object.values(groupedIssuesMap);
+
+
+// A grouped problem is considered:
+// Pending       -> if ANY student report is Pending
+// In Progress   -> if there are no Pending reports but ANY is In Progress
+// Resolved      -> only when ALL reports are Resolved
+const getGroupStatus = (group) => {
+    const statuses = group.issues.map((item) => item.status);
+
+    if (statuses.includes("Pending")) {
+        return "Pending";
+    }
+
+    if (statuses.includes("In Progress")) {
+        return "In Progress";
+    }
+
+    return "Resolved";
+};
+
+
+// Build groups from ALL reports for dashboard statistics.
+const allGroupsMap = {};
+
+issues.forEach((issue) => {
+    const key = getProblemKey(issue);
+
+    if (!allGroupsMap[key]) {
+        allGroupsMap[key] = {
+            key,
+            representative: issue,
+            issues: []
+        };
+    }
+
+    allGroupsMap[key].issues.push(issue);
+});
+
+const allProblemGroups = Object.values(allGroupsMap);
+
+
+// ==================================================
+// STATISTICS — COUNT PROBLEMS, NOT INDIVIDUAL REPORTS
+// ==================================================
+
+const totalIssues =
+    allProblemGroups.length;
+
+
+const pendingIssues =
+    allProblemGroups.filter(
+        (group) =>
+            getGroupStatus(group) === "Pending"
+    ).length;
+
+
+const inProgressIssues =
+    allProblemGroups.filter(
+        (group) =>
+            getGroupStatus(group) === "In Progress"
+    ).length;
+
+
+const resolvedIssues =
+    allProblemGroups.filter(
+        (group) =>
+            getGroupStatus(group) === "Resolved"
+    ).length;
+
+
+const highPriorityIssues =
+    allProblemGroups.filter(
+        (group) =>
+            group.issues.some(
+                (issue) => issue.priority === "High"
+            )
+    ).length;
+
+
+// ==================================================
+// CATEGORY ANALYTICS
+// ==================================================
+
+const categories = [
+
+    "Laboratory",
+
+    "Classroom",
+
+    "Wi-Fi",
+
+    "Water",
+
+    "Cleaning",
+
+    "Electrical",
+
+    "Furniture",
+
+    "Other"
+
+];
+
+
+const categoryCounts =
+    categories.map(
+        (category) => {
+
+            return {
+
+                category: category,
+
+                count: issues.filter(
+                    (issue) =>
+                        issue.category ===
+                        category
+                ).length
+
+            };
+
+        }
+    );
+
+
+const maxCategoryCount =
+    Math.max(
+
+        ...categoryCounts.map(
+            (item) =>
+                item.count
+        ),
+
+        1
+
+    );
+
+
+// ==================================================
+// CLEAR FILTERS
+// ==================================================
+
+const clearFilters = () => {
+
+    setSearch("");
+
+    setCategoryFilter("All");
+
+    setStatusFilter("All");
+
+    setPriorityFilter("All");
+
+};
+
+
+// ==================================================
+// LOGOUT
+// ==================================================
+
+const logout = () => {
+
+    localStorage.removeItem("token");
+
+    localStorage.removeItem("user");
+
+    navigate("/login");
+
+};
+
+
+// ==================================================
+// LOADING SCREEN
+// ==================================================
+
+if (loading) {
 
     return (
 
         <div className="app-container">
 
 
-            {/* ==================================================
-                NAVBAR
-            ================================================== */}
+            {/* NAVBAR */}
 
             <nav className="navbar">
 
-
                 <div className="logo">
-
                     🛠 CampusFix
+                </div>
+
+            </nav>
+
+
+            {/* LOADING */}
+
+            <main className="page-container">
+
+                <div className="loading">
+
+                    Loading Admin Dashboard...
 
                 </div>
 
+            </main>
 
-                <div
-                    className="nav-links"
-                >
+        </div>
+
+    );
+
+}
+
+
+// ==================================================
+// MAIN UI
+// ==================================================
+
+return (
+
+    <div className="app-container">
+
+
+        {/* ==================================================
+                NAVBAR
+            ================================================== */}
+
+        <nav className="navbar">
+
+
+            <div className="logo">
+
+                🛠 CampusFix
+
+            </div>
+
+
+            <div
+                className="nav-links"
+            >
 
                     <span>
 
@@ -3448,245 +3447,245 @@ function AdminDashboard() {
                     </span>
 
 
-                    <button
-                        className="btn btn-danger"
-                        onClick={logout}
-                    >
-                        Logout
-                    </button>
+                <button
+                    className="btn btn-danger"
+                    onClick={logout}
+                >
+                    Logout
+                </button>
 
-                </div>
+            </div>
 
-            </nav>
+        </nav>
 
 
-            {/* ==================================================
+        {/* ==================================================
                 MAIN
             ================================================== */}
 
-            <main className="page-container">
+        <main className="page-container">
 
 
-                {/* ==================================================
+            {/* ==================================================
                     PAGE HEADER
                 ================================================== */}
 
-                <div className="page-header">
+            <div className="page-header">
 
-                    <h1>
-                        🛠 Admin Dashboard
-                    </h1>
+                <h1>
+                    🛠 Admin Dashboard
+                </h1>
 
-                    <p>
-                        Manage and track all
-                        reported campus issues.
-                    </p>
+                <p>
+                    Manage and track all
+                    reported campus issues.
+                </p>
 
-                </div>
+            </div>
 
 
-                {/* ==================================================
+            {/* ==================================================
                     MESSAGE
                 ================================================== */}
 
-                {message && (
+            {message && (
 
-                    <div
-                        className="message"
-                        style={{
-                            marginBottom:
-                                "20px"
-                        }}
-                    >
+                <div
+                    className="message"
+                    style={{
+                        marginBottom:
+                            "20px"
+                    }}
+                >
 
-                        {message}
+                    {message}
 
-                    </div>
+                </div>
 
-                )}
+            )}
 
 
-                {/* ==================================================
+            {/* ==================================================
                     STATISTICS
                 ================================================== */}
 
-                <section className="section">
+            <section className="section">
 
 
-                    <h2 className="section-title">
+                <h2 className="section-title">
 
-                        📊 Issue Statistics
+                    📊 Issue Statistics
 
-                    </h2>
-
-
-                    <div className="stats-grid">
+                </h2>
 
 
-                        {/* TOTAL */}
+                <div className="stats-grid">
 
-                        <div className="stat-card">
 
-                            <div
-                                className="stat-number"
-                            >
-                                {totalIssues}
-                            </div>
+                    {/* TOTAL */}
 
-                            <div
-                                className="stat-title"
-                            >
-                                Total Issues
-                            </div>
+                    <div className="stat-card">
 
+                        <div
+                            className="stat-number"
+                        >
+                            {totalIssues}
                         </div>
 
-
-                        {/* PENDING */}
-
-                        <div className="stat-card">
-
-                            <div
-                                className="stat-number"
-                            >
-                                {pendingIssues}
-                            </div>
-
-                            <div
-                                className="stat-title"
-                            >
-                                Pending
-                            </div>
-
-                        </div>
-
-
-                        {/* IN PROGRESS */}
-
-                        <div className="stat-card">
-
-                            <div
-                                className="stat-number"
-                            >
-                                {inProgressIssues}
-                            </div>
-
-                            <div
-                                className="stat-title"
-                            >
-                                In Progress
-                            </div>
-
-                        </div>
-
-
-                        {/* RESOLVED */}
-
-                        <div className="stat-card">
-
-                            <div
-                                className="stat-number"
-                            >
-                                {resolvedIssues}
-                            </div>
-
-                            <div
-                                className="stat-title"
-                            >
-                                Resolved
-                            </div>
-
-                        </div>
-
-
-                        {/* HIGH PRIORITY */}
-
-                        <div className="stat-card">
-
-                            <div
-                                className="stat-number"
-                            >
-                                {highPriorityIssues}
-                            </div>
-
-                            <div
-                                className="stat-title"
-                            >
-                                High Priority
-                            </div>
-
+                        <div
+                            className="stat-title"
+                        >
+                            Total Issues
                         </div>
 
                     </div>
 
-                </section>
+
+                    {/* PENDING */}
+
+                    <div className="stat-card">
+
+                        <div
+                            className="stat-number"
+                        >
+                            {pendingIssues}
+                        </div>
+
+                        <div
+                            className="stat-title"
+                        >
+                            Pending
+                        </div>
+
+                    </div>
 
 
-                {/* ==================================================
+                    {/* IN PROGRESS */}
+
+                    <div className="stat-card">
+
+                        <div
+                            className="stat-number"
+                        >
+                            {inProgressIssues}
+                        </div>
+
+                        <div
+                            className="stat-title"
+                        >
+                            In Progress
+                        </div>
+
+                    </div>
+
+
+                    {/* RESOLVED */}
+
+                    <div className="stat-card">
+
+                        <div
+                            className="stat-number"
+                        >
+                            {resolvedIssues}
+                        </div>
+
+                        <div
+                            className="stat-title"
+                        >
+                            Resolved
+                        </div>
+
+                    </div>
+
+
+                    {/* HIGH PRIORITY */}
+
+                    <div className="stat-card">
+
+                        <div
+                            className="stat-number"
+                        >
+                            {highPriorityIssues}
+                        </div>
+
+                        <div
+                            className="stat-title"
+                        >
+                            High Priority
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            {/* ==================================================
                     CATEGORY ANALYTICS
                 ================================================== */}
 
-                <section className="section">
+            <section className="section">
 
 
-                    <h2 className="section-title">
+                <h2 className="section-title">
 
-                        📊 Category-wise Issue Analytics
+                    📊 Category-wise Issue Analytics
 
-                    </h2>
-
-
-                    <div
-                        className="issue-card"
-                        style={{
-                            marginTop:
-                                "20px"
-                        }}
-                    >
-
-                        {categoryCounts.map(
-                            (item) => {
-
-                                const barWidth =
-                                    item.count === 0
-
-                                        ? 0
-
-                                        :
-
-                                        (
-                                            item.count /
-                                            maxCategoryCount
-                                        ) * 100;
+                </h2>
 
 
-                                return (
+                <div
+                    className="issue-card"
+                    style={{
+                        marginTop:
+                            "20px"
+                    }}
+                >
+
+                    {categoryCounts.map(
+                        (item) => {
+
+                            const barWidth =
+                                item.count === 0
+
+                                    ? 0
+
+                                    :
+
+                                    (
+                                        item.count /
+                                        maxCategoryCount
+                                    ) * 100;
+
+
+                            return (
+
+                                <div
+                                    key={
+                                        item.category
+                                    }
+                                    style={{
+                                        marginBottom:
+                                            "20px"
+                                    }}
+                                >
+
+
+                                    {/* CATEGORY NAME */}
 
                                     <div
-                                        key={
-                                            item.category
-                                        }
                                         style={{
+                                            display:
+                                                "flex",
+                                            justifyContent:
+                                                "space-between",
+                                            alignItems:
+                                                "center",
                                             marginBottom:
-                                                "20px"
+                                                "7px"
                                         }}
                                     >
-
-
-                                        {/* CATEGORY NAME */}
-
-                                        <div
-                                            style={{
-                                                display:
-                                                    "flex",
-                                                justifyContent:
-                                                    "space-between",
-                                                alignItems:
-                                                    "center",
-                                                marginBottom:
-                                                    "7px"
-                                            }}
-                                        >
 
                                             <span
                                                 style={{
@@ -3704,449 +3703,449 @@ function AdminDashboard() {
                                             </span>
 
 
-                                            <strong
-                                                style={{
-                                                    color:
-                                                        "#60a5fa"
-                                                }}
-                                            >
+                                        <strong
+                                            style={{
+                                                color:
+                                                    "#60a5fa"
+                                            }}
+                                        >
 
-                                                {
-                                                    item.count
-                                                }
+                                            {
+                                                item.count
+                                            }
 
-                                            </strong>
+                                        </strong>
 
-                                        </div>
+                                    </div>
 
 
-                                        {/* BAR */}
+                                    {/* BAR */}
+
+                                    <div
+                                        style={{
+                                            width:
+                                                "100%",
+                                            height:
+                                                "12px",
+                                            background:
+                                                "#334155",
+                                            borderRadius:
+                                                "10px",
+                                            overflow:
+                                                "hidden"
+                                        }}
+                                    >
 
                                         <div
                                             style={{
                                                 width:
-                                                    "100%",
+                                                    `${barWidth}%`,
                                                 height:
-                                                    "12px",
+                                                    "100%",
                                                 background:
-                                                    "#334155",
+                                                    "#2563eb",
                                                 borderRadius:
                                                     "10px",
-                                                overflow:
-                                                    "hidden"
+                                                transition:
+                                                    "width 0.4s ease"
                                             }}
-                                        >
-
-                                            <div
-                                                style={{
-                                                    width:
-                                                        `${barWidth}%`,
-                                                    height:
-                                                        "100%",
-                                                    background:
-                                                        "#2563eb",
-                                                    borderRadius:
-                                                        "10px",
-                                                    transition:
-                                                        "width 0.4s ease"
-                                                }}
-                                            />
-
-                                        </div>
+                                        />
 
                                     </div>
 
-                                );
+                                </div>
 
-                            }
-                        )}
+                            );
 
-                    </div>
+                        }
+                    )}
 
-                </section>
+                </div>
+
+            </section>
 
 
-                {/* ==================================================
+            {/* ==================================================
                     STATUS OVERVIEW
                 ================================================== */}
 
-                <section className="section">
+            <section className="section">
 
 
-                    <h2 className="section-title">
+                <h2 className="section-title">
 
-                        📈 Status Overview
+                    📈 Status Overview
 
-                    </h2>
+                </h2>
 
+
+                <div
+                    style={{
+                        display:
+                            "grid",
+                        gridTemplateColumns:
+                            "repeat(auto-fit, minmax(180px, 1fr))",
+                        gap:
+                            "15px",
+                        marginTop:
+                            "20px"
+                    }}
+                >
+
+
+                    {/* PENDING */}
 
                     <div
                         style={{
-                            display:
-                                "grid",
-                            gridTemplateColumns:
-                                "repeat(auto-fit, minmax(180px, 1fr))",
-                            gap:
-                                "15px",
-                            marginTop:
+                            background:
+                                "#422006",
+                            border:
+                                "1px solid #854d0e",
+                            borderRadius:
+                                "12px",
+                            padding:
                                 "20px"
                         }}
                     >
 
-
-                        {/* PENDING */}
-
                         <div
                             style={{
-                                background:
-                                    "#422006",
-                                border:
-                                    "1px solid #854d0e",
-                                borderRadius:
-                                    "12px",
-                                padding:
-                                    "20px"
+                                color:
+                                    "#fef3c7",
+                                fontSize:
+                                    "14px"
                             }}
                         >
-
-                            <div
-                                style={{
-                                    color:
-                                        "#fef3c7",
-                                    fontSize:
-                                        "14px"
-                                }}
-                            >
-                                Pending
-                            </div>
-
-
-                            <div
-                                style={{
-                                    fontSize:
-                                        "30px",
-                                    fontWeight:
-                                        "bold",
-                                    color:
-                                        "#facc15",
-                                    marginTop:
-                                        "5px"
-                                }}
-                            >
-                                {pendingIssues}
-                            </div>
-
+                            Pending
                         </div>
 
 
-                        {/* IN PROGRESS */}
-
                         <div
                             style={{
-                                background:
-                                    "#172554",
-                                border:
-                                    "1px solid #1d4ed8",
-                                borderRadius:
-                                    "12px",
-                                padding:
-                                    "20px"
+                                fontSize:
+                                    "30px",
+                                fontWeight:
+                                    "bold",
+                                color:
+                                    "#facc15",
+                                marginTop:
+                                    "5px"
                             }}
                         >
-
-                            <div
-                                style={{
-                                    color:
-                                        "#dbeafe",
-                                    fontSize:
-                                        "14px"
-                                }}
-                            >
-                                In Progress
-                            </div>
-
-
-                            <div
-                                style={{
-                                    fontSize:
-                                        "30px",
-                                    fontWeight:
-                                        "bold",
-                                    color:
-                                        "#60a5fa",
-                                    marginTop:
-                                        "5px"
-                                }}
-                            >
-                                {inProgressIssues}
-                            </div>
-
-                        </div>
-
-
-                        {/* RESOLVED */}
-
-                        <div
-                            style={{
-                                background:
-                                    "#052e16",
-                                border:
-                                    "1px solid #166534",
-                                borderRadius:
-                                    "12px",
-                                padding:
-                                    "20px"
-                            }}
-                        >
-
-                            <div
-                                style={{
-                                    color:
-                                        "#dcfce7",
-                                    fontSize:
-                                        "14px"
-                                }}
-                            >
-                                Resolved
-                            </div>
-
-
-                            <div
-                                style={{
-                                    fontSize:
-                                        "30px",
-                                    fontWeight:
-                                        "bold",
-                                    color:
-                                        "#4ade80",
-                                    marginTop:
-                                        "5px"
-                                }}
-                            >
-                                {resolvedIssues}
-                            </div>
-
+                            {pendingIssues}
                         </div>
 
                     </div>
 
-                </section>
+
+                    {/* IN PROGRESS */}
+
+                    <div
+                        style={{
+                            background:
+                                "#172554",
+                            border:
+                                "1px solid #1d4ed8",
+                            borderRadius:
+                                "12px",
+                            padding:
+                                "20px"
+                        }}
+                    >
+
+                        <div
+                            style={{
+                                color:
+                                    "#dbeafe",
+                                fontSize:
+                                    "14px"
+                            }}
+                        >
+                            In Progress
+                        </div>
 
 
-                {/* ==================================================
+                        <div
+                            style={{
+                                fontSize:
+                                    "30px",
+                                fontWeight:
+                                    "bold",
+                                color:
+                                    "#60a5fa",
+                                marginTop:
+                                    "5px"
+                            }}
+                        >
+                            {inProgressIssues}
+                        </div>
+
+                    </div>
+
+
+                    {/* RESOLVED */}
+
+                    <div
+                        style={{
+                            background:
+                                "#052e16",
+                            border:
+                                "1px solid #166534",
+                            borderRadius:
+                                "12px",
+                            padding:
+                                "20px"
+                        }}
+                    >
+
+                        <div
+                            style={{
+                                color:
+                                    "#dcfce7",
+                                fontSize:
+                                    "14px"
+                            }}
+                        >
+                            Resolved
+                        </div>
+
+
+                        <div
+                            style={{
+                                fontSize:
+                                    "30px",
+                                fontWeight:
+                                    "bold",
+                                color:
+                                    "#4ade80",
+                                marginTop:
+                                    "5px"
+                            }}
+                        >
+                            {resolvedIssues}
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            {/* ==================================================
                     SEARCH & FILTER
                 ================================================== */}
 
-                <section className="section">
+            <section className="section">
 
 
-                    <h2 className="section-title">
+                <h2 className="section-title">
 
-                        🔎 Search & Filter Issues
+                    🔎 Search & Filter Issues
 
-                    </h2>
-
-
-                    <div
-                        style={{
-                            display:
-                                "grid",
-                            gridTemplateColumns:
-                                "2fr 1fr 1fr 1fr",
-                            gap:
-                                "15px",
-                            alignItems:
-                                "end"
-                        }}
-                    >
+                </h2>
 
 
-                        {/* SEARCH */}
-
-                        <div className="form-group">
-
-                            <label>
-                                Search
-                            </label>
-
-
-                            <input
-                                type="text"
-                                placeholder="Search title, location, student..."
-                                value={search}
-                                onChange={(e) =>
-                                    setSearch(
-                                        e.target.value
-                                    )
-                                }
-                            />
-
-                        </div>
+                <div
+                    style={{
+                        display:
+                            "grid",
+                        gridTemplateColumns:
+                            "2fr 1fr 1fr 1fr",
+                        gap:
+                            "15px",
+                        alignItems:
+                            "end"
+                    }}
+                >
 
 
-                        {/* CATEGORY */}
+                    {/* SEARCH */}
 
-                        <div className="form-group">
+                    <div className="form-group">
 
-                            <label>
-                                Category
-                            </label>
-
-
-                            <select
-                                value={
-                                    categoryFilter
-                                }
-                                onChange={(e) =>
-                                    setCategoryFilter(
-                                        e.target.value
-                                    )
-                                }
-                            >
-
-                                <option value="All">
-                                    All Categories
-                                </option>
-
-                                <option value="Laboratory">
-                                    Laboratory
-                                </option>
-
-                                <option value="Classroom">
-                                    Classroom
-                                </option>
-
-                                <option value="Wi-Fi">
-                                    Wi-Fi
-                                </option>
-
-                                <option value="Water">
-                                    Water
-                                </option>
-
-                                <option value="Cleaning">
-                                    Cleaning
-                                </option>
-
-                                <option value="Electrical">
-                                    Electrical
-                                </option>
-
-                                <option value="Furniture">
-                                    Furniture
-                                </option>
-
-                                <option value="Other">
-                                    Other
-                                </option>
-
-                            </select>
-
-                        </div>
+                        <label>
+                            Search
+                        </label>
 
 
-                        {/* STATUS */}
-
-                        <div className="form-group">
-
-                            <label>
-                                Status
-                            </label>
-
-
-                            <select
-                                value={
-                                    statusFilter
-                                }
-                                onChange={(e) =>
-                                    setStatusFilter(
-                                        e.target.value
-                                    )
-                                }
-                            >
-
-                                <option value="All">
-                                    All Status
-                                </option>
-
-                                <option value="Pending">
-                                    Pending
-                                </option>
-
-                                <option value="In Progress">
-                                    In Progress
-                                </option>
-
-                                <option value="Resolved">
-                                    Resolved
-                                </option>
-
-                            </select>
-
-                        </div>
-
-
-                        {/* PRIORITY */}
-
-                        <div className="form-group">
-
-                            <label>
-                                Priority
-                            </label>
-
-
-                            <select
-                                value={
-                                    priorityFilter
-                                }
-                                onChange={(e) =>
-                                    setPriorityFilter(
-                                        e.target.value
-                                    )
-                                }
-                            >
-
-                                <option value="All">
-                                    All Priorities
-                                </option>
-
-                                <option value="Low">
-                                    Low
-                                </option>
-
-                                <option value="Medium">
-                                    Medium
-                                </option>
-
-                                <option value="High">
-                                    High
-                                </option>
-
-                            </select>
-
-                        </div>
+                        <input
+                            type="text"
+                            placeholder="Search title, location, student..."
+                            value={search}
+                            onChange={(e) =>
+                                setSearch(
+                                    e.target.value
+                                )
+                            }
+                        />
 
                     </div>
 
 
-                    {/* FILTER RESULTS */}
+                    {/* CATEGORY */}
 
-                    <div
-                        style={{
-                            display:
-                                "flex",
-                            justifyContent:
-                                "space-between",
-                            alignItems:
-                                "center",
-                            marginTop:
-                                "15px",
-                            flexWrap:
-                                "wrap",
-                            gap:
-                                "10px"
-                        }}
-                    >
+                    <div className="form-group">
+
+                        <label>
+                            Category
+                        </label>
+
+
+                        <select
+                            value={
+                                categoryFilter
+                            }
+                            onChange={(e) =>
+                                setCategoryFilter(
+                                    e.target.value
+                                )
+                            }
+                        >
+
+                            <option value="All">
+                                All Categories
+                            </option>
+
+                            <option value="Laboratory">
+                                Laboratory
+                            </option>
+
+                            <option value="Classroom">
+                                Classroom
+                            </option>
+
+                            <option value="Wi-Fi">
+                                Wi-Fi
+                            </option>
+
+                            <option value="Water">
+                                Water
+                            </option>
+
+                            <option value="Cleaning">
+                                Cleaning
+                            </option>
+
+                            <option value="Electrical">
+                                Electrical
+                            </option>
+
+                            <option value="Furniture">
+                                Furniture
+                            </option>
+
+                            <option value="Other">
+                                Other
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    {/* STATUS */}
+
+                    <div className="form-group">
+
+                        <label>
+                            Status
+                        </label>
+
+
+                        <select
+                            value={
+                                statusFilter
+                            }
+                            onChange={(e) =>
+                                setStatusFilter(
+                                    e.target.value
+                                )
+                            }
+                        >
+
+                            <option value="All">
+                                All Status
+                            </option>
+
+                            <option value="Pending">
+                                Pending
+                            </option>
+
+                            <option value="In Progress">
+                                In Progress
+                            </option>
+
+                            <option value="Resolved">
+                                Resolved
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    {/* PRIORITY */}
+
+                    <div className="form-group">
+
+                        <label>
+                            Priority
+                        </label>
+
+
+                        <select
+                            value={
+                                priorityFilter
+                            }
+                            onChange={(e) =>
+                                setPriorityFilter(
+                                    e.target.value
+                                )
+                            }
+                        >
+
+                            <option value="All">
+                                All Priorities
+                            </option>
+
+                            <option value="Low">
+                                Low
+                            </option>
+
+                            <option value="Medium">
+                                Medium
+                            </option>
+
+                            <option value="High">
+                                High
+                            </option>
+
+                        </select>
+
+                    </div>
+
+                </div>
+
+
+                {/* FILTER RESULTS */}
+
+                <div
+                    style={{
+                        display:
+                            "flex",
+                        justifyContent:
+                            "space-between",
+                        alignItems:
+                            "center",
+                        marginTop:
+                            "15px",
+                        flexWrap:
+                            "wrap",
+                        gap:
+                            "10px"
+                    }}
+                >
 
                         <span
                             style={{
@@ -4186,8 +4185,75 @@ function AdminDashboard() {
                         </span>
 
 
+                    <button
+                        className="btn btn-secondary"
+                        onClick={
+                            clearFilters
+                        }
+                    >
+                        Clear Filters
+                    </button>
+
+                </div>
+
+            </section>
+
+
+            {/* ==================================================
+                    ALL REPORTED ISSUES
+                ================================================== */}
+
+            <section className="section">
+
+
+                <h2 className="section-title">
+
+                    All Reported Issues
+
+                </h2>
+
+
+                {groupedIssues.length === 0 ? (
+
+                    <div className="empty-state">
+
+                        <div
+                            style={{
+                                fontSize:
+                                    "45px",
+                                marginBottom:
+                                    "15px"
+                            }}
+                        >
+                            🔍
+                        </div>
+
+
+                        <h3
+                            style={{
+                                color:
+                                    "#f8fafc",
+                                marginBottom:
+                                    "10px"
+                            }}
+                        >
+                            No Matching Issues
+                        </h3>
+
+
+                        <p
+                            style={{
+                                marginBottom:
+                                    "20px"
+                            }}
+                        >
+                            Try changing your
+                            search or filters.
+                        </p>
+
+
                         <button
-                            className="btn btn-secondary"
+                            className="btn btn-primary"
                             onClick={
                                 clearFilters
                             }
@@ -4197,257 +4263,190 @@ function AdminDashboard() {
 
                     </div>
 
-                </section>
+                ) : (
+
+                    groupedIssues.map(
+                        (group) => {
+
+                            const issue = group.representative;
+                            const groupId = group.key;
+                            const issueIds = group.issues.map(
+                                (item) => item.id
+                            );
+
+                            const groupStatus = getGroupStatus(group);
+
+                            // The visible status represents the whole problem group,
+                            // not just the first student's report.
+                            const selectedStatus =
+                                pendingStatus[groupId] ??
+                                groupStatus;
+
+                            const currentNote =
+                                resolutionNotes[groupId] ??
+                                issue.resolutionNote ??
+                                "";
 
 
-                {/* ==================================================
-                    ALL REPORTED ISSUES
-                ================================================== */}
+                            return (
 
-                <section className="section">
-
-
-                    <h2 className="section-title">
-
-                        All Reported Issues
-
-                    </h2>
+                                <div
+                                    className="issue-card"
+                                    key={
+                                        groupId
+                                    }
+                                >
 
 
-                    {groupedIssues.length === 0 ? (
-
-                        <div className="empty-state">
-
-                            <div
-                                style={{
-                                    fontSize:
-                                        "45px",
-                                    marginBottom:
-                                        "15px"
-                                }}
-                            >
-                                🔍
-                            </div>
-
-
-                            <h3
-                                style={{
-                                    color:
-                                        "#f8fafc",
-                                    marginBottom:
-                                        "10px"
-                                }}
-                            >
-                                No Matching Issues
-                            </h3>
-
-
-                            <p
-                                style={{
-                                    marginBottom:
-                                        "20px"
-                                }}
-                            >
-                                Try changing your
-                                search or filters.
-                            </p>
-
-
-                            <button
-                                className="btn btn-primary"
-                                onClick={
-                                    clearFilters
-                                }
-                            >
-                                Clear Filters
-                            </button>
-
-                        </div>
-
-                    ) : (
-
-                        groupedIssues.map(
-                            (group) => {
-
-                                const issue = group.representative;
-                                const groupId = group.key;
-                                const issueIds = group.issues.map(
-                                    (item) => item.id
-                                );
-
-                                const groupStatus = getGroupStatus(group);
-
-                                // The visible status represents the whole problem group,
-                                // not just the first student's report.
-                                const selectedStatus =
-                                    pendingStatus[groupId] ??
-                                    groupStatus;
-
-                                const currentNote =
-                                    resolutionNotes[groupId] ??
-                                    issue.resolutionNote ??
-                                    "";
-
-
-                                return (
-
-                                    <div
-                                        className="issue-card"
-                                        key={
-                                            groupId
-                                        }
-                                    >
-
-
-                                        {/* ==================================================
+                                    {/* ==================================================
                                             TITLE
                                         ================================================== */}
 
-                                        <h3>
+                                    <h3>
 
-                                            {issue.title}
+                                        {issue.title}
 
-                                        </h3>
+                                    </h3>
 
 
-                                        {/* Affected students */}
-                                        <div
-                                            style={{
-                                                marginTop: "10px",
-                                                marginBottom: "16px",
-                                                padding: "10px 14px",
-                                                background: "#172554",
-                                                border: "1px solid #1d4ed8",
-                                                borderRadius: "8px",
-                                                color: "#bfdbfe",
-                                                fontSize: "14px",
-                                                fontWeight: "600"
-                                            }}
-                                        >
-                                            👥 {group.issues.length} student{
-                                            group.issues.length === 1 ? "" : "s"
-                                        } reported this problem
+                                    {/* Affected students */}
+                                    <div
+                                        style={{
+                                            marginTop: "10px",
+                                            marginBottom: "16px",
+                                            padding: "10px 14px",
+                                            background: "#172554",
+                                            border: "1px solid #1d4ed8",
+                                            borderRadius: "8px",
+                                            color: "#bfdbfe",
+                                            fontSize: "14px",
+                                            fontWeight: "600"
+                                        }}
+                                    >
+                                        👥 {group.issues.length} student{
+                                        group.issues.length === 1 ? "" : "s"
+                                    } reported this problem
 
-                                            {group.issues.length > 1 && (
-                                                <div
-                                                    style={{
-                                                        marginTop: "8px",
-                                                        fontWeight: "500",
-                                                        color: "#dbeafe"
-                                                    }}
-                                                >
-                                                    {group.issues.map((item) => (
-                                                        <span
-                                                            key={item.id}
-                                                            style={{
-                                                                display: "inline-block",
-                                                                marginRight: "12px",
-                                                                marginTop: "4px"
-                                                            }}
-                                                        >
+                                        {group.issues.length > 1 && (
+                                            <div
+                                                style={{
+                                                    marginTop: "8px",
+                                                    fontWeight: "500",
+                                                    color: "#dbeafe"
+                                                }}
+                                            >
+                                                {group.issues.map((item) => (
+                                                    <span
+                                                        key={item.id}
+                                                        style={{
+                                                            display: "inline-block",
+                                                            marginRight: "12px",
+                                                            marginTop: "4px"
+                                                        }}
+                                                    >
                                       • {item.reporterName || "Student"}
-                                                            {item.reporterRollNo
-                                                                ? ` (${item.reporterRollNo})`
-                                                                : ""}
+                                                        {item.reporterRollNo
+                                                            ? ` (${item.reporterRollNo})`
+                                                            : ""}
                                     </span>
-                                                    ))}
-                                                </div>
-                                            )}
-                                        </div>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
 
-                                        {/* ==================================================
+                                    {/* ==================================================
                                             ISSUE INFORMATION
                                         ================================================== */}
 
-                                        <div className="issue-info">
+                                    <div className="issue-info">
 
 
-                                            {/* STUDENT */}
+                                        {/* STUDENT */}
 
-                                            <div>
+                                        <div>
 
-                                                <strong>
-                                                    Student:
-                                                </strong>{" "}
+                                            <strong>
+                                                Student:
+                                            </strong>{" "}
 
-                                                {
-                                                    issue.reporterName ||
-                                                    "Unknown"
-                                                }
+                                            {
+                                                issue.reporterName ||
+                                                "Unknown"
+                                            }
 
-                                            </div>
-
-
-                                            {/* ROLL NUMBER */}
-
-                                            <div>
-
-                                                <strong>
-                                                    Roll No:
-                                                </strong>{" "}
-
-                                                {
-                                                    issue.reporterRollNo ||
-                                                    "N/A"
-                                                }
-
-                                            </div>
+                                        </div>
 
 
-                                            {/* CATEGORY */}
+                                        {/* ROLL NUMBER */}
 
-                                            <div>
+                                        <div>
 
-                                                <strong>
-                                                    Category:
-                                                </strong>{" "}
+                                            <strong>
+                                                Roll No:
+                                            </strong>{" "}
 
-                                                {
-                                                    issue.category
-                                                }
+                                            {
+                                                issue.reporterRollNo ||
+                                                "N/A"
+                                            }
 
-                                            </div>
-
-
-                                            {/* LOCATION */}
-
-                                            <div>
-
-                                                <strong>
-                                                    Location:
-                                                </strong>{" "}
-
-                                                {
-                                                    issue.location
-                                                }
-
-                                            </div>
+                                        </div>
 
 
-                                            {/* PRIORITY */}
+                                        {/* CATEGORY */}
 
-                                            <div>
+                                        <div>
 
-                                                <strong>
-                                                    Priority:
-                                                </strong>{" "}
+                                            <strong>
+                                                Category:
+                                            </strong>{" "}
+
+                                            {
+                                                issue.category
+                                            }
+
+                                        </div>
 
 
-                                                <span
-                                                    className={`badge ${
-                                                        issue.priority ===
-                                                        "High"
+                                        {/* LOCATION */}
 
-                                                            ? "priority-high"
+                                        <div>
 
-                                                            : issue.priority ===
-                                                            "Medium"
+                                            <strong>
+                                                Location:
+                                            </strong>{" "}
 
-                                                                ? "priority-medium"
+                                            {
+                                                issue.location
+                                            }
 
-                                                                : "priority-low"
-                                                    }`}
-                                                >
+                                        </div>
+
+
+                                        {/* PRIORITY */}
+
+                                        <div>
+
+                                            <strong>
+                                                Priority:
+                                            </strong>{" "}
+
+
+                                            <span
+                                                className={`badge ${
+                                                    issue.priority ===
+                                                    "High"
+
+                                                        ? "priority-high"
+
+                                                        : issue.priority ===
+                                                        "Medium"
+
+                                                            ? "priority-medium"
+
+                                                            : "priority-low"
+                                                }`}
+                                            >
 
                                                     {
                                                         issue.priority
@@ -4455,33 +4454,33 @@ function AdminDashboard() {
 
                                                 </span>
 
-                                            </div>
+                                        </div>
 
 
-                                            {/* STATUS */}
+                                        {/* STATUS */}
 
-                                            <div>
+                                        <div>
 
-                                                <strong>
-                                                    Status:
-                                                </strong>{" "}
+                                            <strong>
+                                                Status:
+                                            </strong>{" "}
 
 
-                                                <span
-                                                    className={`status-badge ${
-                                                        selectedStatus ===
-                                                        "Pending"
+                                            <span
+                                                className={`status-badge ${
+                                                    selectedStatus ===
+                                                    "Pending"
 
-                                                            ? "status-pending"
+                                                        ? "status-pending"
 
-                                                            : selectedStatus ===
-                                                            "In Progress"
+                                                        : selectedStatus ===
+                                                        "In Progress"
 
-                                                                ? "status-progress"
+                                                            ? "status-progress"
 
-                                                                : "status-resolved"
-                                                    }`}
-                                                >
+                                                            : "status-resolved"
+                                                }`}
+                                            >
 
                                                     {
                                                         selectedStatus
@@ -4489,509 +4488,469 @@ function AdminDashboard() {
 
                                                 </span>
 
-                                            </div>
-
                                         </div>
 
+                                    </div>
 
-                                        {/* ==================================================
+
+                                    {/* ==================================================
                                             DESCRIPTION
                                         ================================================== */}
 
-                                        <div
-                                            className="issue-description"
-                                        >
+                                    <div
+                                        className="issue-description"
+                                    >
 
-                                            <strong>
-                                                Description:
-                                            </strong>{" "}
+                                        <strong>
+                                            Description:
+                                        </strong>{" "}
 
-                                            {
-                                                issue.description
-                                            }
+                                        {
+                                            issue.description
+                                        }
 
-                                        </div>
+                                    </div>
 
 
-                                        {/* ==================================================
+                                    {/* ==================================================
                                             REPORTED DATE
                                         ================================================== */}
 
-                                        <div
-                                            style={{
-                                                marginTop:
-                                                    "12px",
-                                                color:
-                                                    "#94a3b8",
-                                                fontSize:
-                                                    "14px"
-                                            }}
-                                        >
+                                    <div
+                                        style={{
+                                            marginTop:
+                                                "12px",
+                                            color:
+                                                "#94a3b8",
+                                            fontSize:
+                                                "14px"
+                                        }}
+                                    >
 
-                                            <strong>
-                                                Reported On:
-                                            </strong>{" "}
+                                        <strong>
+                                            Reported On:
+                                        </strong>{" "}
 
-                                            {
-                                                issue.createdAt
-                                                    ? new Date(
-                                                        issue.createdAt
-                                                    ).toLocaleString()
-                                                    : "Not available"
-                                            }
+                                        {
+                                            issue.createdAt
+                                                ? new Date(
+                                                    issue.createdAt
+                                                ).toLocaleString()
+                                                : "Not available"
+                                        }
 
-                                        </div>
+                                    </div>
 
 
-                                        {/* ==================================================
+                                    {/* ==================================================
                                             LAST UPDATED
                                         ================================================== */}
 
-                                        <div
-                                            style={{
-                                                marginTop:
-                                                    "8px",
-                                                color:
-                                                    "#94a3b8",
-                                                fontSize:
-                                                    "14px"
-                                            }}
-                                        >
+                                    <div
+                                        style={{
+                                            marginTop:
+                                                "8px",
+                                            color:
+                                                "#94a3b8",
+                                            fontSize:
+                                                "14px"
+                                        }}
+                                    >
 
-                                            <strong>
-                                                Last Updated:
-                                            </strong>{" "}
+                                        <strong>
+                                            Last Updated:
+                                        </strong>{" "}
 
-                                            {
-                                                issue.updatedAt
-                                                    ? new Date(
-                                                        issue.updatedAt
-                                                    ).toLocaleString()
-                                                    : "Not available"
-                                            }
+                                        {
+                                            issue.updatedAt
+                                                ? new Date(
+                                                    issue.updatedAt
+                                                ).toLocaleString()
+                                                : "Not available"
+                                        }
 
-                                        </div>
+                                    </div>
 
 
-                                        {/* ==================================================
+                                    {/* ==================================================
                                             STATUS HISTORY
                                         ================================================== */}
 
-                                        <div
+                                    <div
+                                        style={{
+                                            marginTop:
+                                                "20px",
+                                            padding:
+                                                "16px",
+                                            background:
+                                                "#0f172a",
+                                            border:
+                                                "1px solid #334155",
+                                            borderRadius:
+                                                "10px"
+                                        }}
+                                    >
+
+
+                                        <h4
                                             style={{
-                                                marginTop:
-                                                    "20px",
-                                                padding:
-                                                    "16px",
-                                                background:
-                                                    "#0f172a",
-                                                border:
-                                                    "1px solid #334155",
-                                                borderRadius:
-                                                    "10px"
+                                                color:
+                                                    "#f8fafc",
+                                                marginBottom:
+                                                    "15px"
                                             }}
                                         >
 
+                                            🕒 Status History
 
-                                            <h4
+                                        </h4>
+
+
+                                        {issue.statusHistory &&
+                                        issue.statusHistory.length >
+                                        0 ? (
+
+                                            <div
                                                 style={{
-                                                    color:
-                                                        "#f8fafc",
-                                                    marginBottom:
-                                                        "15px"
+                                                    display:
+                                                        "flex",
+                                                    flexDirection:
+                                                        "column",
+                                                    gap:
+                                                        "12px"
                                                 }}
                                             >
 
-                                                🕒 Status History
+                                                {issue.statusHistory.map(
+                                                    (
+                                                        history,
+                                                        index
+                                                    ) => (
 
-                                            </h4>
+                                                        <div
+                                                            key={`${issue.id}-history-${index}`}
+                                                            style={{
+                                                                display:
+                                                                    "flex",
+                                                                alignItems:
+                                                                    "center",
+                                                                gap:
+                                                                    "12px"
+                                                            }}
+                                                        >
 
 
-                                            {issue.statusHistory &&
-                                            issue.statusHistory.length >
-                                            0 ? (
-
-                                                <div
-                                                    style={{
-                                                        display:
-                                                            "flex",
-                                                        flexDirection:
-                                                            "column",
-                                                        gap:
-                                                            "12px"
-                                                    }}
-                                                >
-
-                                                    {issue.statusHistory.map(
-                                                        (
-                                                            history,
-                                                            index
-                                                        ) => (
+                                                            {/* ICON */}
 
                                                             <div
-                                                                key={`${issue.id}-history-${index}`}
                                                                 style={{
+                                                                    width:
+                                                                        "30px",
+                                                                    height:
+                                                                        "30px",
+                                                                    minWidth:
+                                                                        "30px",
+                                                                    borderRadius:
+                                                                        "50%",
                                                                     display:
                                                                         "flex",
                                                                     alignItems:
                                                                         "center",
-                                                                    gap:
-                                                                        "12px"
-                                                                }}
-                                                            >
+                                                                    justifyContent:
+                                                                        "center",
 
-
-                                                                {/* ICON */}
-
-                                                                <div
-                                                                    style={{
-                                                                        width:
-                                                                            "30px",
-                                                                        height:
-                                                                            "30px",
-                                                                        minWidth:
-                                                                            "30px",
-                                                                        borderRadius:
-                                                                            "50%",
-                                                                        display:
-                                                                            "flex",
-                                                                        alignItems:
-                                                                            "center",
-                                                                        justifyContent:
-                                                                            "center",
-
-                                                                        background:
-                                                                            history.status ===
-                                                                            "Resolved"
-
-                                                                                ? "#166534"
-
-                                                                                : history.status ===
-                                                                                "In Progress"
-
-                                                                                    ? "#1d4ed8"
-
-                                                                                    : "#854d0e"
-                                                                    }}
-                                                                >
-
-                                                                    {
+                                                                    background:
                                                                         history.status ===
                                                                         "Resolved"
 
-                                                                            ? "✓"
+                                                                            ? "#166534"
 
                                                                             : history.status ===
                                                                             "In Progress"
 
-                                                                                ? "🔧"
+                                                                                ? "#1d4ed8"
 
-                                                                                : "🕐"
+                                                                                : "#854d0e"
+                                                                }}
+                                                            >
+
+                                                                {
+                                                                    history.status ===
+                                                                    "Resolved"
+
+                                                                        ? "✓"
+
+                                                                        : history.status ===
+                                                                        "In Progress"
+
+                                                                            ? "🔧"
+
+                                                                            : "🕐"
+                                                                }
+
+                                                            </div>
+
+
+                                                            {/* DETAILS */}
+
+                                                            <div>
+
+                                                                <div
+                                                                    style={{
+                                                                        color:
+                                                                            "#f8fafc",
+                                                                        fontWeight:
+                                                                            "600"
+                                                                    }}
+                                                                >
+
+                                                                    {
+                                                                        history.status
                                                                     }
 
                                                                 </div>
 
 
-                                                                {/* DETAILS */}
+                                                                <div
+                                                                    style={{
+                                                                        color:
+                                                                            "#64748b",
+                                                                        fontSize:
+                                                                            "12px",
+                                                                        marginTop:
+                                                                            "3px"
+                                                                    }}
+                                                                >
 
-                                                                <div>
+                                                                    {
+                                                                        history.changed_at
 
-                                                                    <div
-                                                                        style={{
-                                                                            color:
-                                                                                "#f8fafc",
-                                                                            fontWeight:
-                                                                                "600"
-                                                                        }}
-                                                                    >
+                                                                            ? new Date(
+                                                                                history.changed_at
+                                                                            ).toLocaleString()
 
-                                                                        {
-                                                                            history.status
-                                                                        }
-
-                                                                    </div>
-
-
-                                                                    <div
-                                                                        style={{
-                                                                            color:
-                                                                                "#64748b",
-                                                                            fontSize:
-                                                                                "12px",
-                                                                            marginTop:
-                                                                                "3px"
-                                                                        }}
-                                                                    >
-
-                                                                        {
-                                                                            history.changed_at
-
-                                                                                ? new Date(
-                                                                                    history.changed_at
-                                                                                ).toLocaleString()
-
-                                                                                : "Date not available"
-                                                                        }
-
-                                                                    </div>
+                                                                            : "Date not available"
+                                                                    }
 
                                                                 </div>
 
                                                             </div>
 
-                                                        )
-                                                    )}
+                                                        </div>
 
-                                                </div>
+                                                    )
+                                                )}
 
-                                            ) : (
+                                            </div>
 
-                                                <div
-                                                    style={{
-                                                        color:
-                                                            "#64748b",
-                                                        fontSize:
-                                                            "13px"
-                                                    }}
-                                                >
-
-                                                    No status history
-                                                    available.
-
-                                                </div>
-
-                                            )}
-
-                                        </div>
-
-
-                                        {/* ==================================================
-                                            EXISTING RESOLUTION NOTE
-                                        ================================================== */}
-
-                                        {issue.resolutionNote && (
+                                        ) : (
 
                                             <div
                                                 style={{
-                                                    marginTop:
-                                                        "15px",
-                                                    padding:
-                                                        "15px",
-                                                    background:
-                                                        "#052e16",
-                                                    border:
-                                                        "1px solid #166534",
-                                                    borderRadius:
-                                                        "10px"
+                                                    color:
+                                                        "#64748b",
+                                                    fontSize:
+                                                        "13px"
                                                 }}
                                             >
 
-                                                <div
-                                                    style={{
-                                                        color:
-                                                            "#86efac",
-                                                        fontWeight:
-                                                            "600",
-                                                        marginBottom:
-                                                            "6px"
-                                                    }}
-                                                >
-
-                                                    📝 Resolution Note
-
-                                                </div>
-
-
-                                                <div
-                                                    style={{
-                                                        color:
-                                                            "#dcfce7",
-                                                        fontSize:
-                                                            "14px",
-                                                        lineHeight:
-                                                            "1.5"
-                                                    }}
-                                                >
-
-                                                    {
-                                                        issue.resolutionNote
-                                                    }
-
-                                                </div>
+                                                No status history
+                                                available.
 
                                             </div>
 
                                         )}
 
+                                    </div>
 
-                                        {/* ==================================================
-                                            CHANGE STATUS
+
+                                    {/* ==================================================
+                                            EXISTING RESOLUTION NOTE
                                         ================================================== */}
 
+                                    {issue.resolutionNote && (
+
                                         <div
-                                            className="status-control"
                                             style={{
                                                 marginTop:
-                                                    "20px"
+                                                    "15px",
+                                                padding:
+                                                    "15px",
+                                                background:
+                                                    "#052e16",
+                                                border:
+                                                    "1px solid #166534",
+                                                borderRadius:
+                                                    "10px"
                                             }}
                                         >
 
-                                            <label>
-                                                Change Status:
-                                            </label>
-
-
-                                            <select
-                                                value={
-                                                    selectedStatus
-                                                }
-                                                onChange={(e) => {
-
-                                                    const newStatus =
-                                                        e.target.value;
-
-
-                                                    setPendingStatus(
-                                                        (
-                                                            previous
-                                                        ) => ({
-
-                                                            ...previous,
-
-                                                            [groupId]:
-                                                            newStatus
-
-                                                        })
-                                                    );
-
+                                            <div
+                                                style={{
+                                                    color:
+                                                        "#86efac",
+                                                    fontWeight:
+                                                        "600",
+                                                    marginBottom:
+                                                        "6px"
                                                 }}
                                             >
 
-                                                <option value="Pending">
-                                                    Pending
-                                                </option>
+                                                📝 Resolution Note
 
-                                                <option value="In Progress">
-                                                    In Progress
-                                                </option>
+                                            </div>
 
-                                                <option value="Resolved">
-                                                    Resolved
-                                                </option>
 
-                                            </select>
+                                            <div
+                                                style={{
+                                                    color:
+                                                        "#dcfce7",
+                                                    fontSize:
+                                                        "14px",
+                                                    lineHeight:
+                                                        "1.5"
+                                                }}
+                                            >
+
+                                                {
+                                                    issue.resolutionNote
+                                                }
+
+                                            </div>
 
                                         </div>
 
+                                    )}
 
-                                        {/* ==================================================
+
+                                    {/* ==================================================
+                                            CHANGE STATUS
+                                        ================================================== */}
+
+                                    <div
+                                        className="status-control"
+                                        style={{
+                                            marginTop:
+                                                "20px"
+                                        }}
+                                    >
+
+                                        <label>
+                                            Change Status:
+                                        </label>
+
+
+                                        <select
+                                            value={
+                                                selectedStatus
+                                            }
+                                            onChange={(e) => {
+
+                                                const newStatus =
+                                                    e.target.value;
+
+
+                                                setPendingStatus(
+                                                    (
+                                                        previous
+                                                    ) => ({
+
+                                                        ...previous,
+
+                                                        [groupId]:
+                                                        newStatus
+
+                                                    })
+                                                );
+
+                                            }}
+                                        >
+
+                                            <option value="Pending">
+                                                Pending
+                                            </option>
+
+                                            <option value="In Progress">
+                                                In Progress
+                                            </option>
+
+                                            <option value="Resolved">
+                                                Resolved
+                                            </option>
+
+                                        </select>
+
+                                    </div>
+
+
+                                    {/* ==================================================
                                             RESOLUTION NOTE INPUT
                                         ================================================== */}
 
-                                        {selectedStatus ===
-                                            "Resolved" && (
+                                    {selectedStatus ===
+                                        "Resolved" && (
 
-                                                <div
+                                            <div
+                                                style={{
+                                                    marginTop:
+                                                        "15px"
+                                                }}
+                                            >
+
+
+                                                <label
                                                     style={{
-                                                        marginTop:
-                                                            "15px"
+                                                        display:
+                                                            "block",
+                                                        color:
+                                                            "#cbd5e1",
+                                                        fontWeight:
+                                                            "600",
+                                                        marginBottom:
+                                                            "8px"
                                                     }}
                                                 >
 
+                                                    📝 Resolution Note
 
-                                                    <label
-                                                        style={{
-                                                            display:
-                                                                "block",
-                                                            color:
-                                                                "#cbd5e1",
-                                                            fontWeight:
-                                                                "600",
-                                                            marginBottom:
-                                                                "8px"
-                                                        }}
-                                                    >
-
-                                                        📝 Resolution Note
-
-                                                    </label>
+                                                </label>
 
 
-                                                    <textarea
-                                                        rows="3"
-                                                        placeholder="Example: Projector cable replaced and tested successfully."
-                                                        value={
-                                                            currentNote
-                                                        }
-                                                        onChange={(e) => {
+                                                <textarea
+                                                    rows="3"
+                                                    placeholder="Example: Projector cable replaced and tested successfully."
+                                                    value={
+                                                        currentNote
+                                                    }
+                                                    onChange={(e) => {
 
-                                                            setResolutionNotes(
-                                                                (
-                                                                    previous
-                                                                ) => ({
+                                                        setResolutionNotes(
+                                                            (
+                                                                previous
+                                                            ) => ({
 
-                                                                    ...previous,
+                                                                ...previous,
 
-                                                                    [groupId]:
-                                                                    e.target.value
+                                                                [groupId]:
+                                                                e.target.value
 
-                                                                })
-                                                            );
+                                                            })
+                                                        );
 
-                                                        }}
-                                                        style={{
-                                                            width:
-                                                                "100%",
-                                                            boxSizing:
-                                                                "border-box",
-                                                            resize:
-                                                                "vertical"
-                                                        }}
-                                                    />
+                                                    }}
+                                                    style={{
+                                                        width:
+                                                            "100%",
+                                                        boxSizing:
+                                                            "border-box",
+                                                        resize:
+                                                            "vertical"
+                                                    }}
+                                                />
 
-
-                                                    <button
-                                                        className="btn btn-success"
-                                                        style={{
-                                                            marginTop:
-                                                                "10px"
-                                                        }}
-                                                        onClick={() => {
-
-                                                            updateStatus(
-
-                                                                issueIds,
-
-                                                                "Resolved",
-
-                                                                currentNote
-
-                                                            );
-
-                                                        }}
-                                                    >
-
-                                                        💾 Save Resolution
-
-                                                    </button>
-
-                                                </div>
-
-                                            )}
-
-
-                                        {/* ==================================================
-                                            SAVE NORMAL STATUS
-                                        ================================================== */}
-
-                                        {selectedStatus !==
-                                            groupStatus &&
-
-                                            selectedStatus !==
-                                            "Resolved" && (
 
                                                 <button
-                                                    className="btn btn-primary"
+                                                    className="btn btn-success"
                                                     style={{
                                                         marginTop:
                                                             "10px"
@@ -5002,48 +4961,88 @@ function AdminDashboard() {
 
                                                             issueIds,
 
-                                                            selectedStatus
+                                                            "Resolved",
+
+                                                            currentNote
 
                                                         );
 
                                                     }}
                                                 >
 
-                                                    💾 Save Status
+                                                    💾 Save Resolution
 
                                                 </button>
 
-                                            )}
+                                            </div>
+
+                                        )}
 
 
-                                    </div>
+                                    {/* ==================================================
+                                            SAVE NORMAL STATUS
+                                        ================================================== */}
 
-                                );
+                                    {selectedStatus !==
+                                        groupStatus &&
 
-                            }
+                                        selectedStatus !==
+                                        "Resolved" && (
 
-                        )
+                                            <button
+                                                className="btn btn-primary"
+                                                style={{
+                                                    marginTop:
+                                                        "10px"
+                                                }}
+                                                onClick={() => {
 
-                    )}
+                                                    updateStatus(
 
-                </section>
+                                                        issueIds,
 
-            </main>
+                                                        selectedStatus
+
+                                                    );
+
+                                                }}
+                                            >
+
+                                                💾 Save Status
+
+                                            </button>
+
+                                        )}
 
 
-            {/* ==================================================
+                                </div>
+
+                            );
+
+                        }
+
+                    )
+
+                )}
+
+            </section>
+
+        </main>
+
+
+        {/* ==================================================
                 FOOTER
             ================================================== */}
 
-            <footer className="footer">
+        <footer className="footer">
 
-                CampusFix © 2026 | College Issue Reporting System
+            CampusFix © 2026 | College Issue Reporting System
 
-            </footer>
+        </footer>
 
-        </div>
+    </div>
 
-    );
+);
 
 }
 
@@ -5085,7 +5084,7 @@ function ForgotPassword() {
         try {
 
             const response = await axios.post(
-                "http://127.0.0.1:5001/api/auth/forgot-password",
+                "https://campusfix-bqs3.onrender.com/api/auth/forgot-password",
                 { email }
             );
 
@@ -5149,7 +5148,7 @@ function ForgotPassword() {
         try {
 
             const response = await axios.post(
-                "http://127.0.0.1:5001/api/auth/reset-password",
+                "https://campusfix-bqs3.onrender.com/api/auth/reset-password",
                 {
                     email,
                     otp,
@@ -5573,5 +5572,6 @@ function App() {
 
 
 export default App;
+
 
 
