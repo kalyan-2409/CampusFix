@@ -20,7 +20,12 @@ app.get("/", (req, res) => {
         message: "CampusFix API is running successfully!"
     });
 });
-
+app.get("/health", (req, res) => {
+    res.status(200).json({
+        status: "OK",
+        message: "CampusFix backend is healthy"
+    });
+});
 async function startServer() {
     try {
         const connection = await db.getConnection();
